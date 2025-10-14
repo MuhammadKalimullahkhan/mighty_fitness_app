@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "326525457638",
+    "project_id": "fitness-app-c07b5",
+    "storage_bucket": "fitness-app-c07b5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:326525457638:android:d150bc48914b1649a49727",
+        "android_client_info": {
+          "package_name": "com.wazar.fitness"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "326525457638-3djoa1fu0m2m633v8qeq9l2cq3cpif39.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARztUaqTsnkkSSOTckBCbyzZM-RzAXU70"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "326525457638-3djoa1fu0m2m633v8qeq9l2cq3cpif39.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
