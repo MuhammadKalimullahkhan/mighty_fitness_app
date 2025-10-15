@@ -1,16 +1,17 @@
 
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:markdown_widget/markdown_widget.dart';
 import '../services/gemini_api_service.dart';
 
 class AssistantWidget extends StatefulWidget {
   const AssistantWidget({super.key});
 
   @override
-  _AssistantWidgetState createState() => _AssistantWidgetState();
+  AssistantWidgetState createState() => AssistantWidgetState();
 }
 
-class _AssistantWidgetState extends State<AssistantWidget> {
+class AssistantWidgetState extends State<AssistantWidget> {
   final _formKey = GlobalKey<FormState>();
   String _userQuery = '';
   String _apiResponse = '';
@@ -33,6 +34,8 @@ class _AssistantWidgetState extends State<AssistantWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       children: <Widget>[
         Form(
@@ -41,7 +44,8 @@ class _AssistantWidgetState extends State<AssistantWidget> {
             children: <Widget>[
               Expanded(
                 child: TextFormField(
-                  decoration: const InputDecoration(labelText: 'Ask your fitness question'),
+                  decoration:
+                      const InputDecoration(labelText: 'Ask your fitness question'),
                   validator: (value) {
                     if (value!.isEmpty) {
                       return 'Please enter a question.';
@@ -54,7 +58,7 @@ class _AssistantWidgetState extends State<AssistantWidget> {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.send, color: Colors.tealAccent),
+                icon: Icon(Icons.send, color: theme.colorScheme.secondary),
                 onPressed: _getApiResponse,
               ),
             ],
@@ -65,10 +69,16 @@ class _AssistantWidgetState extends State<AssistantWidget> {
           const CircularProgressIndicator()
         else if (_apiResponse.isNotEmpty)
           Expanded(
-            child: Markdown(
+            child: MarkdownWidget(
               data: _apiResponse,
-              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                p: Theme.of(context).textTheme.bodyLarge,
+              config: MarkdownConfig(
+                configs: [
+                  PConfig(
+                    textStyle: GoogleFonts.poppins(
+                      textStyle: theme.textTheme.bodyLarge ?? const TextStyle(),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

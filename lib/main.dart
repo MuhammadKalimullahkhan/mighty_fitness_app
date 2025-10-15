@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import './screens/auth_screen.dart';
 import './screens/home_screen.dart';
 import './services/auth_service.dart';
+import './services/firestore_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,42 +23,45 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (ctx) => AuthService(),
         ),
+        Provider<FirestoreService>(
+          create: (_) => FirestoreService(),
+        ),
       ],
       child: Consumer<AuthService>(
         builder: (ctx, auth, _) => MaterialApp(
           title: 'EvolveFit',
           theme: ThemeData(
-            primaryColor: Colors.grey[900],
-            hintColor: Colors.tealAccent[400],
-            scaffoldBackgroundColor: Colors.grey[900],
-            cardColor: Colors.grey[850],
+            useMaterial3: true,
+            primaryColor: const Color(0xFF1A202C),
+            colorScheme: ColorScheme.fromSwatch().copyWith(
+              secondary: Colors.deepOrangeAccent,
+              brightness: Brightness.dark,
+            ),
+            scaffoldBackgroundColor: const Color(0xFF1A202C),
+            cardColor: const Color(0xFF2D3748),
             textTheme: const TextTheme(
               bodyLarge: TextStyle(color: Colors.white),
               bodyMedium: TextStyle(color: Colors.white70),
               titleLarge: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
-            buttonTheme: ButtonTheme.of(context).copyWith(
-              buttonColor: Colors.tealAccent[400],
-              textTheme: ButtonTextTheme.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
             elevatedButtonTheme: ElevatedButtonThemeData(
               style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.black, backgroundColor: Colors.tealAccent[400],
+                foregroundColor: Colors.white, 
+                backgroundColor: Colors.deepOrangeAccent,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
             ),
-            inputDecorationTheme: InputDecorationTheme(
-              labelStyle: TextStyle(color: Colors.tealAccent[400]),
+            inputDecorationTheme: const InputDecorationTheme(
+              labelStyle: TextStyle(color: Colors.deepOrangeAccent),
               focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.tealAccent[400]!),
+                borderSide: BorderSide(color: Colors.deepOrangeAccent),
+                borderRadius: BorderRadius.all(Radius.circular(8)),
               ),
-              enabledBorder: const OutlineInputBorder(
+              enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(color: Colors.white70),
+                borderRadius: BorderRadius.all(Radius.circular(8)),
               ),
             ),
           ),

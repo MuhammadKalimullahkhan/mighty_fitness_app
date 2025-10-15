@@ -1,7 +1,8 @@
 
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../services/firestore_service.dart';
 import '../services/auth_service.dart';
 import '../models/forum_post.dart';
@@ -10,11 +11,12 @@ class ForumScreen extends StatefulWidget {
   const ForumScreen({super.key});
 
   @override
-  _ForumScreenState createState() => _ForumScreenState();
+  ForumScreenState createState() => ForumScreenState();
 }
 
-class _ForumScreenState extends State<ForumScreen> {
+class ForumScreenState extends State<ForumScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _contentController = TextEditingController();
   String _postContent = '';
 
   void _submitPost() {
@@ -22,80 +24,147 @@ class _ForumScreenState extends State<ForumScreen> {
     if (isValid) {
       _formKey.currentState!.save();
       final user = Provider.of<AuthService>(context, listen: false).user;
-      Provider.of<FirestoreService>(context, listen: false).addForumPost(_postContent, user!.email ?? 'anonymous');
-      _formKey.currentState!.reset();
+      Provider.of<FirestoreService>(context, listen: false)
+          .addForumPost(_postContent, user!.email ?? 'anonymous');
+      _contentController.clear();
+      FocusScope.of(context).unfocus();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Community Forum')),
+      appBar: AppBar(
+        title: Text('Community Forum',
+            style: GoogleFonts.poppins(
+                textStyle: theme.textTheme.headlineSmall
+                    ?.copyWith(fontWeight: FontWeight.bold))),
+        backgroundColor: theme.primaryColor,
+        elevation: 0,
+      ),
       body: Column(
         children: <Widget>[
           Expanded(
             child: StreamBuilder<List<ForumPost>>(
-              stream: FirestoreService().getForumPosts(),
+              stream: Provider.of<FirestoreService>(context).getForumPosts(),
               builder: (ctx, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No posts yet!'));
+                  return Center(
+                    child: Text('No posts yet. Be the first to share!',
+                        style: GoogleFonts.poppins(
+                            textStyle: theme.textTheme.titleMedium)),
+                  );
                 }
                 final posts = snapshot.data!;
                 return ListView.builder(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
                   itemCount: posts.length,
-                  itemBuilder: (ctx, index) => Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(posts[index].content, style: Theme.of(context).textTheme.bodyLarge),
-                          const SizedBox(height: 8),
-                          Text(
-                            'by ${posts[index].authorName} on ${posts[index].createdAt.toDate()}',
-                             style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        ],
+                  itemBuilder: (ctx, index) {
+                    final post = posts[index];
+                    return Card(
+                      margin:
+                          const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(post.content,
+                                style: GoogleFonts.poppins(
+                                    textStyle: theme.textTheme.bodyLarge
+                                        ?.copyWith(fontSize: 16))),
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'by ${post.authorName}',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: theme.textTheme.bodySmall?.copyWith(
+                                        color: Colors.white70,
+                                        fontStyle: FontStyle.italic),
+                                  ),
+                                ),
+                                Text(
+                                  DateFormat.yMMMd()
+                                      .add_jm()
+                                      .format(post.createdAt.toDate()),
+                                  style: GoogleFonts.poppins(
+                                    textStyle: theme.textTheme.bodySmall
+                                        ?.copyWith(color: Colors.white70),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 );
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Form(
-              key: _formKey,
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: TextFormField(
-                      decoration: const InputDecoration(labelText: 'New Post'),
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please enter some text.';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) {
-                        _postContent = value!;
-                      },
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.send, color: Colors.tealAccent),
-                    onPressed: _submitPost,
-                  ),
-                ],
+          _buildPostComposer(theme),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPostComposer(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        boxShadow: const [
+          BoxShadow(
+              blurRadius: 10, color: Colors.black26, offset: Offset(0, -2)),
+        ],
+      ),
+      child: Form(
+        key: _formKey,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Expanded(
+              child: TextFormField(
+                controller: _contentController,
+                decoration: const InputDecoration(
+                  hintText: 'Share something with the community...',
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter some text.';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  _postContent = value!;
+                },
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+            ElevatedButton(
+              onPressed: _submitPost,
+              style: ElevatedButton.styleFrom(
+                shape: const CircleBorder(),
+                padding: const EdgeInsets.all(14),
+              ),
+              child: const Icon(Icons.send, size: 24),
+            ),
+          ],
+        ),
       ),
     );
   }

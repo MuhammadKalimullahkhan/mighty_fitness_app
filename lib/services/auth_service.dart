@@ -22,36 +22,12 @@ class AuthService with ChangeNotifier {
   bool get isAuth => _user != null;
   bool get isLoading => _isLoading;
 
-  Future<void> _showErrorDialog(BuildContext context, String message) async {
-    return showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('An Error Occurred!'),
-        content: Text(message),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('Okay'),
-            onPressed: () {
-              Navigator.of(ctx).pop();
-            },
-          )
-        ],
-      ),
-    );
-  }
-
   Future<void> signInWithEmailAndPassword(String email, String password) async {
     _isLoading = true;
     notifyListeners();
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
-    } on FirebaseAuthException catch (error) {
-      var errorMessage = 'Authentication failed';
-      if (error.code == 'user-not-found') {
-        errorMessage = 'Could not find a user with that email.';
-      } else if (error.code == 'wrong-password') {
-        errorMessage = 'Wrong password.';
-      }
+    } on FirebaseAuthException {
       // You can show a dialog or a snackbar here
     } catch (error) {
       // Handle other errors
@@ -74,13 +50,7 @@ class AuthService with ChangeNotifier {
           'createdAt': FieldValue.serverTimestamp(),
         });
       }
-    } on FirebaseAuthException catch (error) {
-      var errorMessage = 'Authentication failed';
-      if (error.code == 'email-already-in-use') {
-        errorMessage = 'This email address is already in use.';
-      } else if (error.code == 'weak-password') {
-        errorMessage = 'The password is too weak.';
-      }
+    } on FirebaseAuthException {
        // You can show a dialog or a snackbar here
     } catch (error) {
        // Handle other errors
